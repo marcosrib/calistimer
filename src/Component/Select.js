@@ -42,6 +42,7 @@ class Select extends Component {
                         )
                     })}
                 </View>
+             
             </View>
         )
     }
