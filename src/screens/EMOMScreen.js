@@ -2,19 +2,28 @@ import React, { Component } from 'react'
 import { View, Keyboard, ScrollView, TextInput, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView } from 'react-native'
 import Select from '../Component/Select'
 import Title from '../Component/Title'
+import Timer from '../Component/Time'
+import ProgressBar from '../Component/ProgressBar'
+import BackgroundProgress from '../Component/BackgroundProgress'
+import Sound, { setCategory } from 'react-native-sound'
 
+const alert = require('../../assets/sound/alarm.m4a')
 class EMOMScreen extends Component {
     state = {
         keyboardTovisible: false,
         alert: 0,
         countDow: 1,
-        time: '25',
+        time: '5',
         isRunning: false,
+        count: 0,
 
         countdowValue: 5
     }
 
     componentDidMount() {
+        Sound.setCategory('Playback', true)
+        this.alert = new Sound(alert)
+
         this.kbShow = Keyboard.addListener('keyboardDidShow', () => {
             this.setState({
                 keyboardTovisible: true
@@ -30,25 +39,46 @@ class EMOMScreen extends Component {
         this.kbShow.remove()
         this.kbHide.remove()
     }
-    play =()=> {
+    play = () => {
         this.setState({ isRunning: true })
-        if(this.state.countDow=== 1){
-            this.countDowTimer = setInterval(()=>{
-                
-                this.setState({countdowValue: this.state.countdowValue -1},()=>{
-                    if(this.state.countdowValue === 0){
+        const count = () => {
+            this.setState({ count: this.state.count + 1 }, () => {
+                if (this.state.count === parseInt(this.state.time) * 60) {
+                    clearInterval(this.countTimer)
+                }
+            })
+        }
+        if (this.state.countDow === 1) {
+            this.countDowTimer = setInterval(() => {
+                this.alert.play()
+
+                this.setState({ countdowValue: this.state.countdowValue - 1 }, () => {
+
+                    if (this.state.countdowValue === 0) {
                         clearInterval(this.countDowTimer)
+                        this.countTimer = setInterval(count, 100)
                     }
                 })
-            },1000)
+            }, 1000)
+        } else {
+            this.countTimer = setInterval(count, 1000)
         }
     }
     render() {
         if (this.state.isRunning) {
+            const percMinute = parseInt(((this.state.count % 60) / 60) * 100)
+            const percTime = parseInt((this.state.count / 60) / parseInt(this.state.time) * 100)
             return (
-                <View style={styles.container}>
-                    <Text>{this.state.countdowValue}</Text>
-                </View>
+                <BackgroundProgress percentage={percMinute}>
+                    <View style={{ flex: 1, justifyContent: 'center' }}>
+                        <Text>{this.state.countdowValue}</Text>
+                        <Timer time={this.state.count} />
+                        <Timer time={parseInt(this.state.time) * 60 - this.state.count} type='text2' appendedText=' restates' />
+                        <Text>{percMinute}</Text>
+                        <Text>{percTime}</Text>
+                        <ProgressBar porcentege={percTime} />
+                    </View>
+                </BackgroundProgress>
 
             )
         } else {
@@ -56,7 +86,7 @@ class EMOMScreen extends Component {
             return (
                 <KeyboardAvoidingView style={{ flex: 1 }}>
                     <ScrollView style={styles.container}>
-                        <Title title={'EMOM'} subTitle={'Every Minute on the Minute'} style={{ paddingTop: this.state.keyboardTovisible ? 20 : 200 }} />
+                        <Title title={'EMOM'} subTitle={'Every Minute on the Minute'} style={{ paddingTop: this.state.keyboardTovisible ? 20 : '50%' }} />
                         <Select
                             current={this.state.alert}
                             label={'Alertas'}
@@ -92,7 +122,7 @@ class EMOMScreen extends Component {
                         <Text style={styles.label} >Quantos minutos</Text>
                         <TextInput style={styles.input} keyboardType='numeric' value={this.state.time} onChangeText={text => this.setState({ time: text })} />
                         <Text style={styles.label} >minutos</Text>
-                        <TouchableOpacity onPress={this.play }>
+                        <TouchableOpacity onPress={this.play}>
                             <Text style={styles.play}>Play</Text>
                         </TouchableOpacity>
                     </ScrollView>
@@ -119,7 +149,7 @@ const styles = StyleSheet.create({
         textAlign: 'center'
     },
     input: {
-        fontSize: 40,
+        fontSize: 35,
         textAlign: 'center'
     },
     play: {
