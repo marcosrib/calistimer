@@ -1,18 +1,39 @@
-import React from 'react'
-import { View } from 'react-native'
+import React, { Component } from 'react'
+import { View, Animated } from 'react-native'
 
-const ProgressBar = props => {
-    const { color, porcentege, height } = props
-   
-    return (
-        <View>
-            <View style={{
-                width: porcentege ? porcentege+'%' : '1%',
-                backgroundColor: color ? color : 'white',
-                height: height ? height : 3
-            }}></View>
-        </View> 
-    )
+class ProgressBar extends Component {
+    constructor(props){
+        super(props)
+        this.width = new Animated.Value(0)
+    }
+
+    componentDidUpdate(prevProps){
+        if(prevProps.porcentege !== this.props.porcentege){
+            Animated.timing(this.width,{
+                toValue: this.props.porcentege,
+                duration: 500
+            }).start()
+        }
+        
+      
+    }
+    render() {
+        const { color, height } = this.props
+        const w = this.width.interpolate({
+           inputRange:[0,100],
+           outputRange:['0%','100%'] 
+        })
+        
+        return (
+            <View>
+                <Animated.View style={{
+                   width: w,
+                    backgroundColor: color ? color : 'white',
+                    height: height ? height : 3
+                }} />
+            </View>
+        )
+    }
 }
 
 export default ProgressBar

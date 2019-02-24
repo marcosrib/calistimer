@@ -11,7 +11,7 @@ const alert = require('../../assets/sound/alarm.m4a')
 class EMOMScreen extends Component {
     state = {
         keyboardTovisible: false,
-        alert: 0,
+        alert: [0],
         countDow: 1,
         time: '5',
         isRunning: false,
@@ -39,10 +39,20 @@ class EMOMScreen extends Component {
         this.kbShow.remove()
         this.kbHide.remove()
     }
+    playAlert =() => {
+       const resto = this.state.count % 60   
+       if(this.state.alert.indexOf(resto)>=0){
+           this.alert.play()
+       }  
+       if(resto>= 55 && resto <=60){
+           this.alert.play()
+       }
+    }
     play = () => {
         this.setState({ isRunning: true })
         const count = () => {
             this.setState({ count: this.state.count + 1 }, () => {
+                this.playAlert()
                 if (this.state.count === parseInt(this.state.time) * 60) {
                     clearInterval(this.countTimer)
                 }
@@ -56,7 +66,7 @@ class EMOMScreen extends Component {
 
                     if (this.state.countdowValue === 0) {
                         clearInterval(this.countDowTimer)
-                        this.countTimer = setInterval(count, 100)
+                        this.countTimer = setInterval(count, 1000)
                     }
                 })
             }, 1000)
@@ -71,12 +81,11 @@ class EMOMScreen extends Component {
             return (
                 <BackgroundProgress percentage={percMinute}>
                     <View style={{ flex: 1, justifyContent: 'center' }}>
-                        <Text>{this.state.countdowValue}</Text>
                         <Timer time={this.state.count} />
-                        <Timer time={parseInt(this.state.time) * 60 - this.state.count} type='text2' appendedText=' restates' />
-                        <Text>{percMinute}</Text>
-                        <Text>{percTime}</Text>
                         <ProgressBar porcentege={percTime} />
+                        <Timer time={parseInt(this.state.time) * 60 - this.state.count} type='text2' appendedText=' restates' />
+                        <Text style={styles.countDow}>{this.state.countdowValue}</Text>
+                       
                     </View>
                 </BackgroundProgress>
 
@@ -93,7 +102,7 @@ class EMOMScreen extends Component {
                             options={[
                                 {
                                     id: 0,
-                                    label: 'desligado'
+                                    label: '0s'
                                 },
                                 {
                                     id: 15,
@@ -108,7 +117,7 @@ class EMOMScreen extends Component {
                                     label: '45s'
                                 }
                             ]}
-                            onSelect={opt => setState({ alert: opt })}
+                            onSelect={opt => this.setState({ alert: opt })}
                         />
                         <Select
                             current={this.state.countDow}
@@ -117,7 +126,7 @@ class EMOMScreen extends Component {
                                 { id: 1, label: 'Sim' },
                                 { id: 0, label: 'Não' }
                             ]}
-                            onSelect={opt => setState({ countDow: opt })}
+                            onSelect={opt => this.setState({ countDow: opt })}
                         />
                         <Text style={styles.label} >Quantos minutos</Text>
                         <TextInput style={styles.input} keyboardType='numeric' value={this.state.time} onChangeText={text => this.setState({ time: text })} />
@@ -155,6 +164,12 @@ const styles = StyleSheet.create({
     play: {
         fontSize: 35,
         textAlign: 'center'
+    },
+    countDow: {
+        fontFamily: 'Ubuntu-Bold',
+        fontSize:144,
+        color:'white',
+        textAlign:'center'
     }
 
 })
