@@ -3,13 +3,15 @@ import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import HomeScreen from './src/screens/HomeScreen'
 import EMOMScreen from './src/screens/EMOMScreen'
+import teste from './src/screens/teste'
 import { createStackNavigator, createAppContainer } from 'react-navigation'
 
 
 const AppNavigator = createStackNavigator({
   Home: HomeScreen,
-  EMOM: EMOMScreen
-}, { initialRouteName: 'EMOM' })
+  EMOM: EMOMScreen,
+  t:teste
+}, { initialRouteName: 't' })
 
 export default createAppContainer(AppNavigator)
 
